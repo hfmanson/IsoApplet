@@ -562,11 +562,7 @@ public class IsoFileSystem extends DedicatedFile {
                 ISOException.throwIt(ISO7816.SW_FILE_NOT_FOUND);
             }
             // The MF ("this") has no parent.
-            if(getCurrentlySelectedDF() != this) {
-                fileToSelect = getCurrentlySelectedDF().getParentDF();
-            } else {
-                ISOException.throwIt(ISO7816.SW_FILE_NOT_FOUND);
-            }
+            fileToSelect = getCurrentlySelectedDF();
             break;
         case 0x04: /* by DF name */
             try {
@@ -701,8 +697,9 @@ public class IsoFileSystem extends DedicatedFile {
          * The host may request all the data (up to 256 Bytes) with Le=00, but the data might be smaller.
          * This is a valid request; we have to send all the data (even if less than 256 Bytes).
          */
-        if(le+offset >= fileData.length) {
-            le = (short)(fileData.length - offset);
+        short maxle = (short)(fileData.length - offset);
+        if(le > maxle) {
+            le = maxle;
         }
 
         apdu.setOutgoingLength(le);
